@@ -10,7 +10,7 @@
 <details>
     <summary> What what does mood journaling mean</summary>
 
-    Mood journaling is a form of self-reflection that involves tracking your emotions and moods over time, typically by writing them down in a journal or using a dedicated app. It's like keeping a diary for your emotional state, helping you identify patterns, triggers, and even progress in managing your mental well-being.
+<h4>Mood journaling is a form of self-reflection that involves tracking your emotions and moods over time, typically by writing them down in a journal or using a dedicated app. It's like keeping a diary for your emotional state, helping you identify patterns, triggers, and even progress in managing your mental well-being.</h4>
 
 </details>
 
