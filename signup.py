@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+import hashlib
 import re
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -35,6 +36,11 @@ def Signup():
             name = input("Enter your name: ")
             email = input("Enter your email: ")
             if check(email):
+                hash_object = hashlib.sha256()
+                hash_object.update(password.encode())
+                hash_password = hash_object.hexdigest()
+                password = hash_password
+
                 user_data = {"Uid": username, "Upswd": password, "Uname": name, "Uemail": email}
                 collection.insert_one(user_data)
                 print("Sign up successful!\n\nLogin to continue.\n")
