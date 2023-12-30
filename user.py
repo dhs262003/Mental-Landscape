@@ -1,45 +1,65 @@
 from pymongo import MongoClient
-from datetime import date
+from datetime import date, datetime
 
 client = MongoClient("mongodb://localhost:27017")
 db = client["mind_landscape"]
 collection = db["userData"]
 
-def User(name):
+def display(name):
     uid = name
     documents = collection.find_one({"Uid": uid})
     
-    if "Entries" in documents:
-        pass
-    else:
-        collection.update_one({}, {"$set": {"Entries":[]}})
-
     pipeline = [
         {"$project": {"count": {"$size": "$Entries"}}}
     ]
     result = list(collection.aggregate(pipeline))
     count = result[0]["count"]
+    # print(count)
 
-    uName = documents["Uname"]
-    print(f"Hey {uName}!\nCheck out your entries below: ")
-    
+    print("Check out your entries below: ")
     if count > 0:
         for i in range(count):
-            print(str(i+1)+". Date: " + documents["Entries"][i]["Edate"] + "\tYou felt: " + documents["Entries"][i]["Emood"] + "\n\ttype " + str(i+1) + " to view entry\n")
+            print(str(i+1)+". Date-Time: " + documents["Entries"][i]["Edatetime"] + "\tYou felt: " + documents["Entries"][i]["Emood"] + "\n\ttype " + str(i+1) + " to view entry\n")
 
-        vChoice = int(input("Enter the number of the entry you want to view: "))
+        vChoice = int(input("Enter the number of the entry you want to view (i -> type 0 to skip): "))
         vChoice-=1
-        if vChoice <= count:
-            print("Date: " + documents["Entries"][vChoice]["Edate"] + "\nMood: " + documents["Entries"][vChoice]["Emood"] + "\nThoughts: " + documents["Entries"][vChoice]["Ethoughts"])
+        if 0 <= vChoice <= count:
+            print("Date-Time: " + documents["Entries"][vChoice]["Edatetime"] + "\nMood: " + documents["Entries"][vChoice]["Emood"] + "\nThoughts: " + documents["Entries"][vChoice]["Ethoughts"])
+        elif vChoice == -1:
+            pass
         else:
             print("Invalid choice.")
     else:
         print("No entries found.")
 
+def User(name):
+    uid = name
+    documents = collection.find_one({"Uid": uid})
+
+    if "Ulocation" in documents:
+        collection.update_one( { "Ulocation": { "$size": 3 } }, { "$pop": { "Ulocation" : -1 } } )
+    
+    if "Entries" in documents:
+        pass
+    else:
+        collection.update_one({}, {"$set": {"Entries":[]}})
+    
+    uName = documents["Uname"]
+    print(f"Hey {uName}!")
+
     choice = str(input("\nWant to make a new entry ? (y/n) :"))
     if choice == "y":
-        print("Todays entry:\nDate: " + str(date.today()))
+        time = str(datetime.now().time().isoformat(timespec='minutes'))
+        print("Todays entry:\n\nDate: " + str(date.today()) + "\nTime: " + time)
+        moodRate = int(input("How do you feel today? (1-5) (1 = very bad, 5 = very good): "))
         mood = str(input("Mood: "))
         thoughts = str(input("Thoughts: "))
-        newEntry = {"Edate" : str(date.today()), "Emood" : mood, "Ethoughts" : thoughts}
+        newEntry = {"Edatetime" : str(date.today()) + f" @ {time}", "EmoodRate" : moodRate,"Emood" : mood, "Ethoughts" : thoughts}
         collection.update_one({}, {"$push": {"Entries": newEntry}})
+        
+        display(uid)
+    elif choice == "n":
+        display(uid)
+    else:
+        print("Invalid choice.")
+    

@@ -1,5 +1,7 @@
 from pymongo import MongoClient
+from datetime import date, datetime
 import hashlib
+import geocoder
 import re
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -35,13 +37,18 @@ def Signup():
         else:
             name = input("Enter your name: ")
             email = input("Enter your email: ")
+            age = int(input("Enter your age: "))
+            calcuDOY = datetime.now().year - age
+            loc = input("Enter your location(city, state, country): ")
+            loc = geocoder.ip('me')
+            saveLoc = str(date.today()) + "; " + loc.city + ", " + loc.state + ", " + loc.country
             if check(email):
                 hash_object = hashlib.sha256()
                 hash_object.update(password.encode())
                 hash_password = hash_object.hexdigest()
                 password = hash_password
 
-                user_data = {"Uid": username, "Upswd": password, "Uname": name, "Uemail": email}
+                user_data = {"Uid": username, "Upswd": password, "Uname": name, "Uemail": email, "Uage": age, "Udoy": calcuDOY ,"Ulocation": [saveLoc]}
                 collection.insert_one(user_data)
                 print("Sign up successful!\n\nLogin to continue.\n")
 

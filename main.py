@@ -7,7 +7,7 @@ def runner():
     if options == 1:
         result = Login()
         if result["success"]:
-            print(f"Login successful!\nWelcome, {result['username']}!")
+            print(f"Login successful!")
             username = result["username"]
             User(username)
         else:

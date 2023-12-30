@@ -1,4 +1,6 @@
 from pymongo import MongoClient
+from datetime import date
+import geocoder
 import hashlib
 
 def Login():
@@ -17,6 +19,9 @@ def Login():
 
     user = collection.find_one({"Uid": username, "Upswd": password})
     if user:
+        loc = geocoder.ip('me')
+        saveLoc = str(date.today()) + "; " + loc.city + ", " + loc.state + ", " + loc.country
+        collection.update_one({}, {"$push": {"Ulocation" : saveLoc}})
         return {"success": True, "username": user["Uid"]}
 
     return {"success": False, "username": None}
