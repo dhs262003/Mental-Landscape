@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from datetime import date
 import geocoder
+from getpass import getpass
 import hashlib
 
 def Login():
@@ -10,7 +11,7 @@ def Login():
     collection = db["userData"]
 
     username = input("Enter your username: ")
-    password = input("Enter your password: ")
+    password = getpass("Enter your password: ")
 
     hash_object = hashlib.sha256()
     hash_object.update(password.encode())
@@ -21,7 +22,7 @@ def Login():
     if user:
         loc = geocoder.ip('me')
         saveLoc = str(date.today()) + "; " + loc.city + ", " + loc.state + ", " + loc.country
-        collection.update_one({}, {"$push": {"Ulocation" : saveLoc}})
+        collection.update_one({"Uid": username}, {"$push": {"Ulocation" : saveLoc}})
         return {"success": True, "username": user["Uid"]}
 
     return {"success": False, "username": None}

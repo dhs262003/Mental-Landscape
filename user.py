@@ -9,11 +9,7 @@ def display(name):
     uid = name
     documents = collection.find_one({"Uid": uid})
     
-    pipeline = [
-        {"$project": {"count": {"$size": "$Entries"}}}
-    ]
-    result = list(collection.aggregate(pipeline))
-    count = result[0]["count"]
+    count = len(documents["Entries"])
     # print(count)
 
     print("Check out your entries below: ")
@@ -42,7 +38,7 @@ def User(name):
     if "Entries" in documents:
         pass
     else:
-        collection.update_one({}, {"$set": {"Entries":[]}})
+        collection.update_one({"Uid": uid}, {"$set": {"Entries":[]}})
     
     uName = documents["Uname"]
     print(f"Hey {uName}!")
@@ -55,7 +51,7 @@ def User(name):
         mood = str(input("Mood: "))
         thoughts = str(input("Thoughts: "))
         newEntry = {"Edatetime" : str(date.today()) + f" @ {time}", "EmoodRate" : moodRate,"Emood" : mood, "Ethoughts" : thoughts}
-        collection.update_one({}, {"$push": {"Entries": newEntry}})
+        collection.update_one({"Uid": uid}, {"$push": {"Entries": newEntry}})
         
         display(uid)
     elif choice == "n":

@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from datetime import date, datetime
 import hashlib
 import geocoder
+from getpass import getpass
 import re
 
 regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -30,7 +31,7 @@ def Signup():
         print("Username already exists, please choose a different username.")
         return   
     else:
-        password = input("Choose a password: ")
+        password = getpass("Choose a password: ")
         if len(password) < 8:
             print("Password should be at least 8 characters long.")
             return
