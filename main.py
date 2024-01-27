@@ -9,7 +9,7 @@ def runner():
         if result["success"]:
             print(f"Login successful!")
             username = result["username"]
-            User(username)
+            User(username,True)
         else:
             print("Invalid username or password.")
             print("Please try again.\n")

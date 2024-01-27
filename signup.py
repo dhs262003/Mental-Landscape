@@ -42,7 +42,7 @@ def Signup():
             calcuDOY = datetime.now().year - age
             loc = input("Enter your location(city, state, country): ")
             loc = geocoder.ip('me')
-            saveLoc = str(date.today()) + "; " + loc.city + ", " + loc.state + ", " + loc.country
+            saveLoc = str(date.today()) + "; " + loc.city + ", " + loc.state + ", " + loc.country + "- @ " + str(datetime.now().time().isoformat(timespec='minutes'))
             if check(email):
                 hash_object = hashlib.sha256()
                 hash_object.update(password.encode())
