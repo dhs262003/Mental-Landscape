@@ -12,7 +12,6 @@ def tracker(uid, result):
     else:
         collection.update_one({"Uid": uid}, {"$set": {"Activities":[]}})
 
-    # print("**Activities**")
     while result:
         choice = int(input("1. Add an activity\n2. Mark an activity\n3. View activities\n4. Back\n"))
         
@@ -32,17 +31,11 @@ def tracker(uid, result):
             return
 
 
-# TODO: things to add in this func
-    # - activity name
-    # - due date
-    # - notes
-    # - tags
 def addActivity(uid):
     print("\nAdd Activity:\n")
     actName = input("Activity name: ")
     tags = input("Tags: ")
-    listOTags = list(tags.split(","))
-    # chech if any tags are repeated.
+    listOTags = list(set(tags.split(",")))
 
     notes = input("Notes: ")
 
