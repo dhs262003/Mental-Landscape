@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from moodStats import stats
 from datetime import date, datetime
+from activityTracker import tracker
 
 client = MongoClient("mongodb://localhost:27017")
 db = client["mind_landscape"]
@@ -17,7 +18,7 @@ def forward(name, result):
             forward(uid, result)
         elif choice == 2:
             print("\nHeres your Activity Tracker: ")
-            forward(uid, result)
+            tracker(uid, result)
         elif choice == 3:
             print("\nHeres your breathing session: ")
             forward(uid, result)
