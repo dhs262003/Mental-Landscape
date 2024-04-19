@@ -13,7 +13,7 @@ def tracker(uid, result):
         collection.update_one({"Uid": uid}, {"$set": {"Activities":[]}})
 
     while result:
-        choice = int(input("1. Add an activity\n2. Mark an activity\n3. View activities\n4. Back\n"))
+        choice = int(input("\n1. Add an activity\n2. Mark an activity\n3. View activities\n4. Back\n"))
         
         if choice < 1 or choice > 4:
             print("Invalid choice. Please try again.")
@@ -45,7 +45,6 @@ def addActivity(uid):
     actName = input("Activity name: ")
     tags = input("Tags: ")
     listOTags = list(set(tags.split(",")))
-
     notes = input("Notes: ")
 
     while True:
@@ -74,9 +73,7 @@ def seeActivity(uid, choice):
     documents = collection.find_one({"Uid": uid})
     docLen = len(documents['Activities'])
     if choice == 1:
-        print("\nAll activities:\n")
-        for i in range(docLen):
-            print(f"{i+1}. {documents['Activities'][i]['ActName']}\t\tDue Date: {documents['Activities'][i]['ActDueDate']}")
+        mrkActivity(uid)
     if choice == 2:
         while True:
             sAfilter = int(input("\nFilters: \n1. Filter by tags\n2. Filter by due date\n"))
@@ -102,12 +99,30 @@ def seeActivity(uid, choice):
                     print("ERROR....\nInvalid tag. Please try again.\n")
                     continue
         elif sAfilter == 2:
-            print("TODO")
+            today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+            overDueActivities = []
+            onTimeActivities = []
+            for activity in documents['Activities']:
+                duedate = activity['ActDueDate']
+                dDateObj = datetime.strptime(duedate, "%Y-%m-%d")
+                if dDateObj < today: overDueActivities.append((activity, duedate))
+                else: onTimeActivities.append((activity, duedate))
+            
+            print("\nOverdue Activities:")
+            for activity, duedate in overDueActivities: print(f"{activity['ActName']} \t- Due Date: {duedate}")
+            
+            print("\nActivities with Time Left:")
+            for activity, duedate in onTimeActivities:
+                timeLeft = dDateObj - today
+                print(f"{activity['ActName']} \t- Due Date: {duedate} \t- {timeLeft.days} days left")
     return
 
 def mrkActivity(uid):
-    print("heelo from mrkActivity")
-    print(f"uid: {uid}\n")
+    documents = collection.find_one({"Uid": uid})
+    docLen = len(documents['Activities'])
+    print("\nAll activities:\n")
+    for i in range(docLen):
+        print(f"{i+1}. {documents['Activities'][i]['ActName']}\t\tDue Date: {documents['Activities'][i]['ActDueDate']}")
     return
 
 
