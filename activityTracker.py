@@ -23,7 +23,7 @@ def tracker(uid, result):
             addActivity(uid)
             pass
         elif choice == 2:
-            mrkActivity(uid)
+            mrkActivity(uid, True)
             pass
         elif choice == 3:
             sA = int(input("\n1. View all activities\n2. Put a filter\n"))
@@ -38,7 +38,6 @@ def tracker(uid, result):
             return
         elif choice == 4:
             return
-
 
 def addActivity(uid):
     print("\nAdd Activity:\n")
@@ -56,7 +55,7 @@ def addActivity(uid):
             print("Invalid date format. Please try again.")
     dueDate = str(dueDate)
 
-    newAct = {"ActName": actName, "ActTags": listOTags, "ActNotes": notes, "ActDueDate": dueDate}
+    newAct = {"ActName": actName, "ActTags": listOTags, "ActNotes": notes, "ActDueDate": dueDate, "ActDone": False}
     collection.update_one({"Uid": uid}, {"$push": {"Activities": newAct}})
     print("\nActivity added successfully.\n")
     return
@@ -71,10 +70,9 @@ def checkTags(tag, uid):
 
 def seeActivity(uid, choice):
     documents = collection.find_one({"Uid": uid})
-    docLen = len(documents['Activities'])
-    if choice == 1:
-        mrkActivity(uid)
-    if choice == 2:
+    if choice == 1:  # View all activities
+        mrkActivity(uid, False)
+    if choice == 2:  # Filter activities
         while True:
             sAfilter = int(input("\nFilters: \n1. Filter by tags\n2. Filter by due date\n"))
             if sAfilter < 1 or sAfilter > 2:
@@ -82,7 +80,7 @@ def seeActivity(uid, choice):
                 continue
             else: break
         
-        if sAfilter == 1:
+        if sAfilter == 1: # Filter by tags
             while True:
                 tag = input("Enter tag: ")
                 if checkTags(tag, uid):
@@ -92,13 +90,14 @@ def seeActivity(uid, choice):
                     for activity in documents['Activities']:
                         if tag in activity['ActTags'] and activity['ActName'] not in printed_activities:
                             printed_activities.add(activity['ActName'])  # Add the activity name to the set
-                            print(f"{idx}. {activity['ActName']}\t\tDue Date: {activity['ActDueDate']}")
+                            done = "Activity Done" if activity['ActDone'] else "Activity Not done"
+                            print(f"{idx}. {activity['ActName']}\t\tDue Date: {activity['ActDueDate']}\t\t{done}")
                             idx+=1
                     break
                 else:
                     print("ERROR....\nInvalid tag. Please try again.\n")
                     continue
-        elif sAfilter == 2:
+        elif sAfilter == 2: # Filter by due date
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             overDueActivities = []
             onTimeActivities = []
@@ -109,21 +108,53 @@ def seeActivity(uid, choice):
                 else: onTimeActivities.append((activity, duedate))
             
             print("\nOverdue Activities:")
-            for activity, duedate in overDueActivities: print(f"{activity['ActName']} \t- Due Date: {duedate}")
+            for activity, duedate in overDueActivities:
+                done = "Activity Done" if activity['ActDone'] else "Activity Not done"
+                print(f"{activity['ActName']} \t- Due Date: {duedate} \t- {done}")
             
             print("\nActivities with Time Left:")
             for activity, duedate in onTimeActivities:
+                done = "Activity Done" if activity['ActDone'] else "Activity Not done"
                 timeLeft = dDateObj - today
-                print(f"{activity['ActName']} \t- Due Date: {duedate} \t- {timeLeft.days} days left")
+                print(f"{activity['ActName']} \t- Due Date: {duedate} \t- {timeLeft.days} days left \t- {done}")
     return
 
-def mrkActivity(uid):
+def updateActivity(uid, idx):
+    print(f"\nUpdate Activity:\n{idx}")
+    return
+
+def mrkActivity(uid, change):
     documents = collection.find_one({"Uid": uid})
-    docLen = len(documents['Activities'])
     print("\nAll activities:\n")
-    for i in range(docLen):
-        print(f"{i+1}. {documents['Activities'][i]['ActName']}\t\tDue Date: {documents['Activities'][i]['ActDueDate']}")
+    for i in range(len(documents['Activities'])):
+        print(f"{i+1}. {documents['Activities'][i]['ActName']}\t\tDue Date: {documents['Activities'][i]['ActDueDate']}\t\tDone: {documents['Activities'][i]['ActDone']}")
+    
+    while change: # mrk or update ?
+        what = int(input("\nSelect the following:\n1. Mark an activity as done\n2. update an activity\n"))
+        if what < 1 or what > 2:
+            print("Invalid choice. Please try again.")
+            continue
+        else: break
+    if change and what == 1: # mark as done
+        while True: # enter idx
+            idx = int(input("\nEnter the index of the activity to mark as done: "))
+            if idx < 1 or idx > len(documents['Activities']):
+                print("Invalid choice. Please try again.")
+                continue
+            else: break
+        
+        collection.update_one({"Uid": uid}, { "$set": {f"Activities.{(idx-1)}.ActDone": True }})
+        print("Activity marked as done.")
+
+    elif change and what == 2: # update
+        while True: # enter idx
+            idx = int(input("\nEnter the index of the activity to update: "))
+            if idx < 1 or idx > len(documents['Activities']):
+                print("Invalid choice. Please try again.")
+                continue
+            else: break
+        updateActivity(uid, idx-1)
     return
 
-
+# TODO: mrkActivity , 2 things, update values of activity; update bool value of activity AKA mrk as done
 tracker("dhso", True)
