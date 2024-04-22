@@ -120,7 +120,66 @@ def seeActivity(uid, choice):
     return
 
 def updateActivity(uid, idx):
-    print(f"\nUpdate Activity:\n{idx}")
+    documents = collection.find_one({"Uid": uid})
+    print(f"\nUpdate Activity:\n{idx+1}")
+    print("\nWhich value to update?\n1. Activity name\n2. Tags\n3. Notes\n4. Due date\n")
+    while True: #Taking the choice
+        choice = int(input("Enter your choice: "))
+        if choice < 1 or choice > 4:
+            print("Invalid choice. Please try again.")
+            continue
+        else: break
+    if choice == 1: # update activity name
+        while True: # enter new name
+            newActName = input("Enter new activity name: ")
+            if newActName != "" and newActName != documents['Activities'][idx]['ActName'] and newActName!= " ":
+                collection.update_one({"Uid": uid}, {"$set": {f"Activities.{idx}.ActName": newActName}})
+                print(f"\nActivity name updated to '{newActName}'.\n")
+                break
+            else:
+                print("\nInvalid name. Please try again.\n")
+                continue
+    elif choice == 2: # update tags
+        listOfTags = documents['Activities'][idx]['ActTags']
+        while True:
+            newTag = input("Enter new tag: ")
+            if newTag != "" and newTag not in listOfTags and newTag != " ":
+                listOfTags.append(newTag)
+                collection.update_one({"Uid": uid}, {"$set": {f"Activities.{idx}.ActTags": listOfTags}})
+                print(f"\nTag '{newTag}' added to activity.\n")
+                break
+            else:
+                print("\nInvalid tag. Please try again.\n")
+                continue
+    elif choice == 3: # update notes
+        while True:
+            newActNote = input("Enter new activity notes: ")
+            if newActNote != "" and newActNote != documents['Activities'][idx]['ActNotes']:
+                collection.update_one({"Uid": uid}, {"$set": {f"Activities.{idx}.ActNotes": newActNote}})
+                print(f"\nActivity notes updated.\n")
+                break
+            else:
+                print("\nInvalid values in new notes. Please try again.\n")
+                continue
+    elif choice == 4: # update due date
+        while True:
+            newActDueDate = input("Enter new activity due date (dd-mm-yyyy): ")
+            while True:
+                try:
+                    newActDueDate = datetime.strptime(newActDueDate, '%d-%m-%Y').date()
+                    break
+                except ValueError:
+                    print("Invalid date format. Please try again.")
+            
+            newActDueDate = str(newActDueDate)
+            if newActDueDate != documents['Activities'][idx]['ActDueDate']:
+                collection.update_one({"Uid": uid}, {"$set": {f"Activities.{idx}.ActDueDate": newActDueDate}})
+                print(f"\nActivity due date updated to '{newActDueDate}'.\n")
+                break
+            else:
+                print("\nEnter a different due date. Please try again.\n")
+                continue
+
     return
 
 def mrkActivity(uid, change):
@@ -155,6 +214,3 @@ def mrkActivity(uid, change):
             else: break
         updateActivity(uid, idx-1)
     return
-
-# TODO: mrkActivity , 2 things, update values of activity; update bool value of activity AKA mrk as done
-tracker("dhso", True)
